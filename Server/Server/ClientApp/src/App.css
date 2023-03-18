@@ -1,0 +1,7 @@
+﻿@font-face {
+    font-family: BerkshireSwash;
+    src: url("/public/font/BerkshireSwash-Regular.ttf");
+}
+* {
+    font-family: BerkshireSwash;
+}
