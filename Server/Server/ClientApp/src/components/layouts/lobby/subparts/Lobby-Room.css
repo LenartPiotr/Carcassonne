@@ -1,0 +1,17 @@
+﻿.Lobby_Room {
+    display: flex;
+    justify-content: space-around;
+    flex-direction: row;
+    align-items: center;
+    width: 100%;
+    margin: 10px 0px;
+}
+.Lobby_Room > img {
+    width: 80px;
+    height: 80px;
+}
+.Lobby_Room > P {
+    font-size: 24px;
+    margin: 0;
+    padding: 0;
+}

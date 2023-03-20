@@ -9,7 +9,7 @@ export class MButton extends Component {
     }
     render() {
         return (
-            <div className="MButton" style={{ width: this.width, height: this.height }}>
+            <div className="MButton" style={{ width: this.width, height: this.height, minHeight: this.height }} onClick={ this.props.click }>
                 <div>{this.props.text}</div>
             </div>
         );

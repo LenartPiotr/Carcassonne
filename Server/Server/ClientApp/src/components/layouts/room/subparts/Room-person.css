@@ -1,0 +1,18 @@
+﻿.Room_person {
+    display: flex;
+    justify-content: normal;
+    align-items: center;
+    flex-direction: row;
+    width: 100%;
+    margin: 10px 0;
+}
+.Room_person > * {
+    margin: 0 20px;
+}
+.Room_person > div {
+    flex: 1;
+}
+.Room_person > img {
+    width: 100px;
+    height: 100px;
+}

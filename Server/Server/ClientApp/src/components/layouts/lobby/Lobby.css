@@ -6,15 +6,25 @@
     width: 100%;
     height: 100%;
 }
-.main {
+.main-lobby {
     width: 100%;
     height: 100%;
-    background-image: url("/public/img/background.png");
+    background-image: url("/public/img/background-square.png");
     background-repeat: repeat-x;
     background-attachment: fixed;
-    background-size: auto 100%;
 }
-.content {
+@media (orientation: landscape) {
+    .main-lobby {
+        background-size: 100% auto;
+    }
+}
+
+@media (orientation: portrait) {
+    .main-lobby {
+        background-size: auto 100%;
+    }
+}
+.main-lobby > .content {
     margin: 0 auto;
     width: 800px;
     height: 100%;
@@ -25,16 +35,9 @@
     align-items: center;
     color: white;
 }
-.logo{
+.main-lobby .logo {
     width: 80%;
 }
-.form-container {
-    width: 60%;
-    display: flex;
-    justify-content: flex-start;
-    flex-direction: column;
-    margin-bottom: 30px;
-}
-.form-container > * {
-    width: 100%;
+.main-lobby > .content > .MButton{
+    margin: 10px 0;
 }
