@@ -14,7 +14,9 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <PackageReference Include="BCrypt.Net-Next" Version="4.0.3" />
     <PackageReference Include="Microsoft.AspNetCore.SpaProxy" Version="6.0.14" />
+    <PackageReference Include="MySqlConnector" Version="2.2.5" />
   </ItemGroup>
 
   <ItemGroup>

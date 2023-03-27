@@ -12,6 +12,7 @@
     background-image: url("/public/img/background-square.png");
     background-repeat: repeat-x;
     background-attachment: fixed;
+    position: relative;
 }
 @media (orientation: landscape) {
     .main {
