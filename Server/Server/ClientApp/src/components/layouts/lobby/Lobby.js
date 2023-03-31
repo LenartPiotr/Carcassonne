@@ -22,6 +22,7 @@ export class Lobby extends Component {
             subpart: 'login',
             rooms: rooms
         };
+        this.refresh();
     }
 
     changeSubpart() {
@@ -31,8 +32,19 @@ export class Lobby extends Component {
     }
 
     clickJoinRoom(room) {
-        // console.log(room.name);
         this.props.navigate("/room");
+    }
+
+    refresh() {
+        fetch('/lobby/getroomslist', {
+            method: 'post',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            credentials: "same-origin"
+        }).then(res => res.text()).then(res => {
+            console.log(res);
+        });
     }
 
     render() {

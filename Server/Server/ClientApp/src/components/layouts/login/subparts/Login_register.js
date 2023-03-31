@@ -1,6 +1,12 @@
 ﻿import React, { Component } from 'react';
 import { MButton } from '../../../simple/MButton';
 import { MInput } from '../../../simple/MInput';
+import { useNavigate } from "react-router-dom";
+
+export function Login_registerWithRoute(props) {
+    const navigate = useNavigate();
+    return (<Login_register navigate={navigate} {...props}></Login_register>);
+}
 
 export class Login_register extends Component {
     constructor() {
@@ -23,6 +29,7 @@ export class Login_register extends Component {
             headers: {
                 'Content-Type': 'application/json'
             },
+            credentials: "same-origin",
             body: JSON.stringify({
                 nick: this.state.nick,
                 email: this.state.email,
@@ -30,6 +37,7 @@ export class Login_register extends Component {
             })
         }).then(res => res.json()).then(res => {
             if (!res.Success) this.props.addMessage(res.Message);
+            else this.props.navigate('/lobby');
         });
     }
 

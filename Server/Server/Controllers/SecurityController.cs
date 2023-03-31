@@ -9,7 +9,7 @@ namespace Server.Controllers
 {
     [ApiController]
     [Route("[controller]")]
-    public class SecurityController : Controller
+    public class SecurityController : SessionController
     {
         [HttpPost]
         [Route("register")]
@@ -29,6 +29,7 @@ namespace Server.Controllers
             int affectedRows = repository.AddUser(user);
             if (affectedRows == 1)
             {
+                CreateSession(repository.GetUserByNickName(user.Nick));
                 return JsonSerializer.Serialize(new StatusResponse() { Success = true, Message = "ok" });
             }
             return JsonSerializer.Serialize(new StatusResponse() { Success = false, Message = "cannot register user" });
@@ -55,6 +56,7 @@ namespace Server.Controllers
                 return JsonSerializer.Serialize(failedResponse);
             }
 
+            CreateSession(databaseUser);
             return JsonSerializer.Serialize(new StatusResponse() { Success = true, Message = "ok" });
         }
 
@@ -119,7 +121,3 @@ namespace Server.Controllers
         }
     }
 }
-
-/*
-fetch("/security/register",{method:'post',headers:{'Content-Type':'application/json'},body:JSON.stringify({nick:'abc',email:'abc',password:'abc'})}).then(e=>e.text()).then(e=>console.log(e))
-*/

@@ -23,12 +23,14 @@ export class Login_login extends Component {
             headers: {
                 'Content-Type': 'application/json'
             },
+            credentials: "same-origin",
             body: JSON.stringify({
                 nick: this.state.nick,
                 password: this.state.password
             })
         }).then(res => res.json()).then(res => {
             if (!res.Success) this.props.addMessage(res.Message);
+            else this.props.navigate('/lobby');
         });
     }
 
