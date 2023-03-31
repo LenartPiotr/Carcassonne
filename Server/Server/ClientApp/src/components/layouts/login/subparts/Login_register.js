@@ -24,20 +24,12 @@ export class Login_register extends Component {
             this.props.addMessage("Password are not the same");
             return;
         }
-        fetch('/security/register', {
-            method: 'post',
-            headers: {
-                'Content-Type': 'application/json'
-            },
-            credentials: "same-origin",
-            body: JSON.stringify({
-                nick: this.state.nick,
-                email: this.state.email,
-                password: this.state.password
-            })
-        }).then(res => res.json()).then(res => {
+        this.props.fetch(this.props.navigate, '/security/register', {
+            nick: this.state.nick,
+            email: this.state.email,
+            password: this.state.password
+        }, (res) => {
             if (!res.Success) this.props.addMessage(res.Message);
-            else this.props.navigate('/lobby');
         });
     }
 

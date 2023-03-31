@@ -36,15 +36,7 @@ export class Lobby extends Component {
     }
 
     refresh() {
-        fetch('/lobby/getroomslist', {
-            method: 'post',
-            headers: {
-                'Content-Type': 'application/json'
-            },
-            credentials: "same-origin"
-        }).then(res => res.text()).then(res => {
-            console.log(res);
-        });
+        //
     }
 
     render() {

@@ -32,8 +32,8 @@ export class Login extends Component {
                     <img src="img/logo.png" className="logo"></img>
                     {
                         this.state.subpart == 'login' ?
-                            (<Login_loginWithRoute changeSubpart={this.changeSubpart.bind(this)} addMessage={this.log.bind(this)}></Login_loginWithRoute>) :
-                            (<Login_registerWithRoute changeSubpart={this.changeSubpart.bind(this)} addMessage={this.log.bind(this)}></Login_registerWithRoute>)
+                            (<Login_loginWithRoute fetch={this.props.fetch} changeSubpart={this.changeSubpart.bind(this)} addMessage={this.log.bind(this)}></Login_loginWithRoute>) :
+                            (<Login_registerWithRoute fetch={this.props.fetch} changeSubpart={this.changeSubpart.bind(this)} addMessage={this.log.bind(this)}></Login_registerWithRoute>)
                     }
                 </div>
             </div>

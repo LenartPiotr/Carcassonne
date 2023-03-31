@@ -29,10 +29,10 @@ namespace Server.Controllers
             int affectedRows = repository.AddUser(user);
             if (affectedRows == 1)
             {
-                CreateSession(repository.GetUserByNickName(user.Nick));
+                CreateSession(user);
                 return JsonSerializer.Serialize(new StatusResponse() { Success = true, Message = "ok" });
             }
-            return JsonSerializer.Serialize(new StatusResponse() { Success = false, Message = "cannot register user" });
+            return JsonSerializer.Serialize(new StatusResponse() { Success = false, Message = "cannot register user", Navigate = "Lobby" });
         }
 
         [HttpPost]
@@ -57,13 +57,7 @@ namespace Server.Controllers
             }
 
             CreateSession(databaseUser);
-            return JsonSerializer.Serialize(new StatusResponse() { Success = true, Message = "ok" });
-        }
-
-        [HttpGet]
-        public string Get(string nick)
-        {
-            return nick + "get";
+            return JsonSerializer.Serialize(new StatusResponse() { Success = true, Message = "ok", Navigate = "Lobby" });
         }
 
         private bool ValidPassword(string password, out string message)
@@ -118,6 +112,7 @@ namespace Server.Controllers
         {
             public bool Success { get; set; }
             public string Message { get; set; } = "";
+            public string Navigate { get; set; } = "";
         }
     }
 }
