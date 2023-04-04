@@ -57,7 +57,9 @@
     "lint": "eslint ./src/"
   },
   "eslintConfig": {
-    "extends": []
+    "extends": [
+		"react-app"
+	]
   },
   "browserslist": {
     "production": [
