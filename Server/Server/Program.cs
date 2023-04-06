@@ -1,14 +1,32 @@
+using Microsoft.EntityFrameworkCore;
 using MySqlConnector;
+using Server.DatabaseContext;
+using Server.Services.CarcassoneGame;
 
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
 
+// FE core with build in memory databases
+//builder.Services.AddDbContext<CarcassonneContext>(options =>
+//    options.UseInMemoryDatabase("CarcassonneDatabase"));
+
+// FE core with database
+
+builder.Services.AddDbContext<AppDatabaseContext>(
+    options => options.UseMySQL(
+        builder.Configuration.GetConnectionString("Default") ?? ""));
+
 builder.Services.AddControllersWithViews();
-builder.Services.AddTransient<MySqlConnection>(_ => new MySqlConnection(builder.Configuration.GetConnectionString("Default")));
+
+// Mysql connection
+// builder.Services.AddTransient<MySqlConnection>(_ => new MySqlConnection(builder.Configuration.GetConnectionString("Default")));
 
 builder.Services.AddDistributedMemoryCache();
 builder.Services.AddSession();
+
+// Add game service as singleton
+builder.Services.AddSingleton<ICarcassonneGame, CarcassonneGame>();
 
 var app = builder.Build();
 

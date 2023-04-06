@@ -1,9 +1,9 @@
 ﻿using System.Text.Json;
 using System.Text.RegularExpressions;
 using Microsoft.AspNetCore.Mvc;
-using Server.Exceptions;
+using Microsoft.EntityFrameworkCore.Scaffolding.Metadata;
+using Server.DatabaseContext;
 using Server.Models;
-using Server.Repositories;
 
 namespace Server.Controllers
 {
@@ -11,6 +11,13 @@ namespace Server.Controllers
     [Route("[controller]")]
     public class SecurityController : SessionController
     {
+        private readonly AppDatabaseContext _context;
+
+        public SecurityController(AppDatabaseContext context)
+        {
+            _context = context;
+        }
+
         [HttpPost]
         [Route("register")]
         public string Register([FromBody] JsonElement element)
@@ -25,14 +32,16 @@ namespace Server.Controllers
 
             user.Password = BCrypt.Net.BCrypt.HashPassword(user.Password, BCrypt.Net.BCrypt.GenerateSalt());
 
-            UserRepository repository = new();
-            int affectedRows = repository.AddUser(user);
-            if (affectedRows == 1)
+            if (_context.Users.Where(u => u.Nick == user.Nick || u.Email == user.Email).Any())
             {
-                CreateSession(user);
-                return JsonSerializer.Serialize(new StatusResponse() { Success = true, Message = "ok" });
+                return JsonSerializer.Serialize(new StatusResponse() { Success = false, Message = "cannot register user" });
             }
-            return JsonSerializer.Serialize(new StatusResponse() { Success = false, Message = "cannot register user", Navigate = "Lobby" });
+
+            _context.Users.Add(user);
+            _context.SaveChanges();
+
+            CreateSession(user);
+            return JsonSerializer.Serialize(new StatusResponse() { Success = true, Message = "ok", Navigate = "Lobby" });
         }
 
         [HttpPost]
@@ -40,16 +49,17 @@ namespace Server.Controllers
         public string Login([FromBody] JsonElement element)
         {
             User clientUser = JsonSerializer.Deserialize<User>(element) ?? new User();
-            User databaseUser;
-            UserRepository repository = new();
 
             StatusResponse failedResponse = new() { Success = false, Message = "Login failed" };
 
-            try {
-                databaseUser = repository.GetUserByNickName(clientUser.Nick);
-            } catch (NoMatchingRecordsException) {
+            User[] databaseUsers = _context.Users.Where(u => u.Nick == clientUser.Nick).ToArray();
+            
+            if (databaseUsers.Length == 0)
+            {
                 return JsonSerializer.Serialize(failedResponse);
             }
+
+            User databaseUser = databaseUsers[0];
 
             if (!BCrypt.Net.BCrypt.Verify(clientUser.Password, databaseUser.Password))
             {
