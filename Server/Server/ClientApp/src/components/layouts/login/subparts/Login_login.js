@@ -26,6 +26,20 @@ export class Login_login extends Component {
         });
     }
 
+    enterPress(event) {
+        if (event.key === "Enter") {
+            this.login();
+        }
+    }
+
+    componentDidMount() {
+        document.addEventListener("keydown", this.enterPress.bind(this), false);
+    }
+
+    componentWillUnmount() {
+        document.removeEventListener("keydown", this.enterPress, false);
+    }
+
     // this.props.navigate("/lobby");
 
     render() {

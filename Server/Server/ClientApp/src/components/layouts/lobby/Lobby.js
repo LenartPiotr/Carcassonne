@@ -2,6 +2,7 @@
 import { useNavigate } from "react-router-dom";
 import { Lobby_Room } from './subparts/Lobby-Room';
 import { MScrollable } from '../../simple/MScrollable';
+import { MLogger } from '../../simple/Logger/MLogger';
 import './Lobby.css';
 import { MButton } from '../../simple/MButton';
 
@@ -12,17 +13,15 @@ export function LobbyWithRoute(props) {
 
 export class Lobby extends Component {
 
-    constructor() {
-        super();
+    constructor(props) {
+        super(props);
         var rooms = [];
-        for (let i = 1; i < 5; i++) {
-            rooms.push({ name: 'Lobby ' + i, min: 1, max: 4 + i, key: i });
-        }
         this.state = {
             subpart: 'login',
             rooms: rooms
         };
-        this.refresh();
+        this.addMessage = _ => _;
+        this.refresh(props);
     }
 
     changeSubpart() {
@@ -35,15 +34,21 @@ export class Lobby extends Component {
         this.props.navigate("/room");
     }
 
-    refresh() {
-        //
+    refresh(props) {
+        props.fetch(props.navigate, '/lobby/getroomslist', {
+        }, (res) => {
+            if (!res.Success) { this.addMessage(res.Message); return; }
+            this.setState({ rooms: res.Rooms.map((v, i) => { return { key: i, name: v.Name, min: v.Min, max: v.Max } })})
+        });
     }
 
     render() {
         return (
             <div className="main-lobby">
+                <MLogger message={(addMessage) => { this.addMessage = addMessage; }} />
                 <div className="content">
                     <img src="img/logo.png" className="logo"></img>
+                    <MButton text="Refresh" width="120" click={this.refresh.bind(this,this.props)}></MButton>
                     <MScrollable>
                         {
                             this.state.rooms.map(e => (

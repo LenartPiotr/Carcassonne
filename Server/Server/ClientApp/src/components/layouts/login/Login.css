@@ -65,3 +65,9 @@
 .main .form-container > * {
     width: 100%;
 }
+
+@media only screen and (max-height: 700px) {
+    .main .logo {
+        width: 60%;
+    }
+}
