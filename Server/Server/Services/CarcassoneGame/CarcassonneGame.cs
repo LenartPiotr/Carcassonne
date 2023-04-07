@@ -1,4 +1,5 @@
 ﻿using Server.Services.CarcassoneGame.ResponseModels;
+using System.Linq;
 
 namespace Server.Services.CarcassoneGame
 {
@@ -9,22 +10,23 @@ namespace Server.Services.CarcassoneGame
 
     public class CarcassonneGame : ICarcassonneGame
     {
+        readonly List<RoomManager> rooms;
+
         public CarcassonneGame()
         {
-            //
+            rooms = new();
         }
 
         public RoomListResponse getRoomLists()
         {
             return new RoomListResponse()
             {
-                Rooms = new List<RoomListResponse.RoomElement>()
+                Rooms = rooms.Select(r => new RoomListResponse.RoomElement()
                 {
-                    new RoomListResponse.RoomElement(){Name = "Lobby 1", Min = 1, Max = 5},
-                    new RoomListResponse.RoomElement(){Name = "Lobby 2", Min = 2, Max = 5},
-                    new RoomListResponse.RoomElement(){Name = "Lobby 3", Min = 3, Max = 5},
-                    new RoomListResponse.RoomElement(){Name = "Lobby 4", Min = 4, Max = 5},
-                }
+                    Name = r.Name,
+                    Min = r.PlayersCount,
+                    Max = r.MaxPlayers
+                }).ToList()
             };
         }
     }

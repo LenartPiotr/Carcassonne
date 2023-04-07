@@ -8,7 +8,14 @@ import { LobbyWithRoute } from "./components/layouts/lobby/Lobby";
 import { RoomWithRoute } from "./components/layouts/room/Room";
 import { GameWithRoute } from "./components/layouts/game/Game";
 
+import * as signalR from '@microsoft/signalr';
+
 import './App.css';
+
+// Connection for SignalR Hub
+const connection = new signalR.HubConnectionBuilder()
+    .withUrl("/hub")
+    .build();
 
 export default class App extends Component {
 
@@ -21,10 +28,11 @@ export default class App extends Component {
     render() {
         return (
             <Routes>
-                <Route index="1" element={(<Login fetch={FetchManager} />)} />
-                <Route path="/lobby" element={(<LobbyWithRoute fetch={FetchManager} />)} />
-                <Route path="/room" element={(<RoomWithRoute fetch={FetchManager} />)} />
-                <Route path="/game" element={(<GameWithRoute fetch={FetchManager} />)} />
+                { /* fetch={FetchManager} */ }
+                <Route index="1" element={(<Login fetch={FetchManager} connection={connection} />)} />
+                <Route path="/lobby" element={(<LobbyWithRoute fetch={FetchManager} connection={connection} />)} />
+                <Route path="/room" element={(<RoomWithRoute fetch={FetchManager} connection={connection} />)} />
+                <Route path="/game" element={(<GameWithRoute fetch={FetchManager} connection={connection} />)} />
             </Routes>
         );
     }

@@ -2,6 +2,7 @@ using Microsoft.EntityFrameworkCore;
 using MySqlConnector;
 using Server.DatabaseContext;
 using Server.Services.CarcassoneGame;
+using Server.SignalRHubs;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -22,8 +23,12 @@ builder.Services.AddControllersWithViews();
 // Mysql connection
 // builder.Services.AddTransient<MySqlConnection>(_ => new MySqlConnection(builder.Configuration.GetConnectionString("Default")));
 
+// Use session
 builder.Services.AddDistributedMemoryCache();
 builder.Services.AddSession();
+
+// Use signalR
+// -- // builder.Services.AddSignalR();
 
 // Add game service as singleton
 builder.Services.AddSingleton<ICarcassonneGame, CarcassonneGame>();
@@ -46,6 +51,9 @@ app.UseSession();
 app.MapControllerRoute(
     name: "default",
     pattern: "{controller}/{action=Index}/{id?}");
+
+// Use SignalR endpoints
+// -- // app.MapHub<GlobalHub>("/hub");
 
 app.MapFallbackToFile("index.html"); ;
 

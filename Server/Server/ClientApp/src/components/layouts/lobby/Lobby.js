@@ -5,6 +5,7 @@ import { MScrollable } from '../../simple/MScrollable';
 import { MLogger } from '../../simple/Logger/MLogger';
 import './Lobby.css';
 import { MButton } from '../../simple/MButton';
+import { MInput } from '../../simple/MInput';
 
 export function LobbyWithRoute(props) {
     const navigate = useNavigate();
@@ -17,17 +18,12 @@ export class Lobby extends Component {
         super(props);
         var rooms = [];
         this.state = {
-            subpart: 'login',
-            rooms: rooms
+            rooms: rooms,
+            showPanel: false
+
         };
         this.addMessage = _ => _;
         this.refresh(props);
-    }
-
-    changeSubpart() {
-        this.setState({
-            subpart: this.state.subpart == 'login' ? 'register' : 'login'
-        });
     }
 
     clickJoinRoom(room) {
@@ -40,6 +36,10 @@ export class Lobby extends Component {
             if (!res.Success) { this.addMessage(res.Message); return; }
             this.setState({ rooms: res.Rooms.map((v, i) => { return { key: i, name: v.Name, min: v.Min, max: v.Max } })})
         });
+    }
+
+    createRoom() {
+        console.log(this.roomName)
     }
 
     render() {
@@ -56,7 +56,17 @@ export class Lobby extends Component {
                             ))
                         }
                     </MScrollable>
-                    <MButton text="Create room" width="180"></MButton>
+                    <MButton text="Create room" width="180" click={() => this.setState({showPanel:true})}></MButton>
+                    <div className="panel" style={{ display: this.state.showPanel ? "flex" : "none" }}>
+                        <div>
+                            <div>Create room</div>
+                            <MInput placeholder="Room name" update={t => { this.roomName = t }} />
+                            <div className="row">
+                                <MButton text="Create" width="120" click={() => { this.setState({ showPanel: false }); this.createRoom(); }} />
+                                <MButton text="Cancel" width="120" click={() => this.setState({ showPanel: false })} />
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </div>
         );

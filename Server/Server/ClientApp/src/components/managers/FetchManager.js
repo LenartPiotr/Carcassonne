@@ -21,4 +21,5 @@ export function FetchManager(navigate, host, body, callback) {
         }
         callback(res);
     });
+
 }
