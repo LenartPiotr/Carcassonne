@@ -25,17 +25,6 @@ export class Login extends Component {
         this.addMessage(text);
     }
 
-    componentDidMount() {
-        this.props.connection.on('Send', message => {
-            console.log(message);
-        });
-        // this.props.connection.invoke('SendToAll', 'user', 'message')
-    }
-
-    componentWillUnmount() {
-        //
-    }
-
     render() {
         return (
             <div className="main">
@@ -47,17 +36,6 @@ export class Login extends Component {
                             (<Login_loginWithRoute fetch={this.props.fetch} changeSubpart={this.changeSubpart.bind(this)} addMessage={this.log.bind(this)}></Login_loginWithRoute>) :
                             (<Login_registerWithRoute fetch={this.props.fetch} changeSubpart={this.changeSubpart.bind(this)} addMessage={this.log.bind(this)}></Login_registerWithRoute>)
                     }
-                    {/*<MButton text="test" click={() => {
-                        this.props.connection.invoke('SendToAll', 'user', 'message')
-                    }} />
-                    <MButton text="connect" click={() => {
-                        this.props.connection.start()
-                            .then(() => console.log('Połączono z serwerem SignalR'))
-                            .catch(err => console.error(err));
-                    }} />
-                    <MButton text="check" click={() => {
-                        console.log(this.props.connection)
-                    }} />*/}
                 </div>
             </div>
         );

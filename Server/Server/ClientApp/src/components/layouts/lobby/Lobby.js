@@ -7,6 +7,8 @@ import './Lobby.css';
 import { MButton } from '../../simple/MButton';
 import { MInput } from '../../simple/MInput';
 
+import ConnectionManager from '../../managers/ConnectionManager';
+
 export function LobbyWithRoute(props) {
     const navigate = useNavigate();
     return (<Lobby navigate={navigate} {...props}></Lobby>);
@@ -24,6 +26,12 @@ export class Lobby extends Component {
         };
         this.addMessage = _ => _;
         this.refresh(props);
+
+        this.conn = new ConnectionManager();
+        this.conn.afterOpen(this.conn.join.bind(this.conn, props.fetch, props.navigate, () => {
+            this.conn.invoke('Username');
+        }));
+        this.conn.on('Username', (u, k) => console.log(u, k));
     }
 
     clickJoinRoom(room) {

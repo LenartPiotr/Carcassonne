@@ -19,5 +19,15 @@ namespace Server.Models
         [JsonPropertyName("password")]
         [Column("password")]
         public string Password { get; set; } = "";
+
+        public override bool Equals(object? obj)
+        {
+            if (obj is User)
+            {
+                User u2 = (User)obj;
+                return u2.IdUser == IdUser;
+            }
+            return base.Equals(obj);
+        }
     }
 }

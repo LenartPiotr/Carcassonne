@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore.Scaffolding.Metadata;
 using Server.DatabaseContext;
 using Server.Models;
+using Server.Services.HubSessionBridge;
 
 namespace Server.Controllers
 {
@@ -12,10 +13,12 @@ namespace Server.Controllers
     public class SecurityController : SessionController
     {
         private readonly AppDatabaseContext _context;
+        private readonly IBridge _bridge;
 
-        public SecurityController(AppDatabaseContext context)
+        public SecurityController(AppDatabaseContext context, IBridge hubBridge)
         {
             _context = context;
+            _bridge = hubBridge;
         }
 
         [HttpPost]
@@ -68,6 +71,18 @@ namespace Server.Controllers
 
             CreateSession(databaseUser);
             return JsonSerializer.Serialize(new StatusResponse() { Success = true, Message = "ok", Navigate = "Lobby" });
+        }
+
+        [HttpPost]
+        [Route("getguid")]
+        public string GetGuid()
+        {
+            if (!GetUser(out User user, _context)) NavigateToLogin();
+            return JsonSerializer.Serialize(new GuidResponse()
+            {
+                Guid = _bridge.RegisterUser(user),
+                Success = true
+            });
         }
 
         private bool ValidPassword(string password, out string message)
@@ -123,6 +138,10 @@ namespace Server.Controllers
             public bool Success { get; set; }
             public string Message { get; set; } = "";
             public string Navigate { get; set; } = "";
+        }
+        class GuidResponse : StatusResponse
+        {
+            public string Guid { get; set; } = "";
         }
     }
 }
