@@ -8,22 +8,20 @@ using Server.SignalRHubs;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// Add services to the container.
+// -- DATABASE INFO -- //
+
+// If you want to use build with memory database uncomment line below and comment next one.
 
 // FE core with build in memory databases
 //builder.Services.AddDbContext<CarcassonneContext>(options =>
 //    options.UseInMemoryDatabase("CarcassonneDatabase"));
 
-// FE core with database
-
+// FE core with database connecting with Docker
 builder.Services.AddDbContext<AppDatabaseContext>(
     options => options.UseMySQL(
         builder.Configuration.GetConnectionString("Default") ?? ""));
 
 builder.Services.AddControllersWithViews();
-
-// Mysql connection
-// builder.Services.AddTransient<MySqlConnection>(_ => new MySqlConnection(builder.Configuration.GetConnectionString("Default")));
 
 // Use session
 builder.Services.AddDistributedMemoryCache();
@@ -43,7 +41,6 @@ var app = builder.Build();
 // Configure the HTTP request pipeline.
 if (!app.Environment.IsDevelopment())
 {
-    // The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
     app.UseHsts();
 }
 
@@ -53,6 +50,7 @@ app.UseRouting();
 
 app.UseSession();
 
+// Use Controllers endpoints
 app.MapControllerRoute(
     name: "default",
     pattern: "{controller}/{action=Index}/{id?}");
