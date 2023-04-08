@@ -29,7 +29,9 @@ export class Lobby extends Component {
 
         this.conn = new ConnectionManager();
         this.conn.afterOpen(this.conn.join.bind(this.conn, props.fetch, props.navigate, () => {
-            this.conn.invoke('Username');
+            setInterval(() => {
+                this.conn.invoke('Username');
+            }, 2000);
         }));
         this.conn.on('Username', (u, k) => console.log(u, k));
     }

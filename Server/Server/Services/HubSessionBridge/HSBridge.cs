@@ -34,6 +34,11 @@ namespace Server.Services.HubSessionBridge
             if (item != null) return item.Key;
             string guid = Guid.NewGuid().ToString();
             queue.Add(new ReadyToJoin(user, guid));
+            var list = dictionary.Where(k => k.Value.IdUser == user.IdUser).ToList();
+            foreach (var i in list)
+            {
+                dictionary.Remove(i.Key);
+            }
             return guid;
         }
 
@@ -47,7 +52,7 @@ namespace Server.Services.HubSessionBridge
             if (dictionary.Where(k => k.Value.IdUser == item.User.IdUser).Any())
                 // There is another device logged in as the same user
                 // Cancel this request or logout him
-                return false; // change to logout second
+                return false;
             dictionary.Add(userIdentity, item.User);
             return true;
         }
