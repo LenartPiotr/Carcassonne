@@ -61,22 +61,30 @@ namespace Server.SignalRHubs
         public async Task CreateRoom(string name)
         {
             if (GetUserOrNavigate(out User user)) { await Navigate("/"); return; }
-            if (game.CreateRoom(this, user, name)) await Navigate("/room");
+            if (await game.CreateRoom(Context.ConnectionId, user, name)) await Navigate("/room");
             else await SendMessage(false, "Cannot create room");
         }
 
         public async Task JoinRoom(string name)
         {
             if (GetUserOrNavigate(out User user)) { await Navigate("/"); return; }
-            if (game.JoinRoom(this, user, name)) await Navigate("/room");
+            if (await game.JoinRoom(Context.ConnectionId, user, name)) await Navigate("/room");
             else await SendMessage(false, "Cannot join to this room");
         }
 
         public async Task LeaveRoom()
         {
             if (GetUserOrNavigate(out User user)) { await Navigate("/"); return; }
-            if (game.LeaveRoom(this, user)) await Navigate("/lobby");
+            if (game.LeaveRoom(Context.ConnectionId, user)) await Navigate("/lobby");
             else await SendMessage(false, "Cannot leave room");
+        }
+
+        public async Task Room(string action, params object[] args)
+        {
+            if (GetUserOrNavigate(out User user)) { await Navigate("/"); return; }
+            var room = game.GetRoom(user);
+            if (room == null) return;
+            room.Action(Context.ConnectionId, user, action, args);
         }
         #endregion
     }

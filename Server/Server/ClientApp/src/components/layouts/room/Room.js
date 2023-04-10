@@ -5,6 +5,8 @@ import { MButton } from '../../simple/MButton';
 import { MScrollable } from '../../simple/MScrollable';
 import { Room_person } from './subparts/Room-person';
 
+import ConnectionManager from '../../managers/ConnectionManager';
+
 import './Room.css';
 
 export function RoomWithRoute(props) {
@@ -25,9 +27,23 @@ export class Room extends Component {
             ],
             current: 'Player 1'
         }
+        this.conn = new ConnectionManager();
+    }
+
+    componentDidMount() {
+        this.conn.on("UpdateUsers", this.onUpdateUsers);
+    }
+
+    componentWillUnmount() {
+        this.conn.off("UpdateUsers", this.onUpdateUsers);
+    }
+
+    onUpdateUsers(tab) {
+        console.log(tab);
     }
 
     kickSomeone(who) {
+        // CHANGE
         if (who.name == undefined) return;
         if (who.name == this.state.current) {
             this.props.navigate('/lobby');

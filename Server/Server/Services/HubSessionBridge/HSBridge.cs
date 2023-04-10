@@ -95,7 +95,7 @@ namespace Server.Services.HubSessionBridge
         {
             RemoveOld();
             var value = dictionary.TryGetValue(userIdentity, out UserData data);
-            user = data.User;
+            if (value) user = data.User; else user = new User();
             return value;
         }
 
