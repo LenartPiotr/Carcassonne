@@ -25,19 +25,24 @@ export class Lobby extends Component {
 
         };
         this.addMessage = _ => _;
-        this.refresh(props);
 
         this.conn = new ConnectionManager();
-        this.conn.afterOpen(this.conn.join.bind(this.conn, props.fetch, props.navigate, () => {
-            setInterval(() => {
-                this.conn.invoke('Username');
-            }, 2000);
-        }));
-        this.conn.on('Username', (u, k) => console.log(u, k));
+        this.conn.afterOpen(this.conn.join.bind(this.conn, props.fetch, props.navigate, () => { }));
+
+        this.refresh(props);
     }
 
-    clickJoinRoom(room) {
-        this.props.navigate("/room");
+    componentDidMount() {
+        this.conn.on("Message", this.onMessage);
+    }
+
+    componentWillUnmount() {
+        this.conn.off("Message", this.onMessage);
+    }
+
+    onMessage(status, message) {
+        console.log(status, message); // LOG
+        this.addMessage(message);
     }
 
     refresh(props) {
@@ -49,7 +54,11 @@ export class Lobby extends Component {
     }
 
     createRoom() {
-        console.log(this.roomName)
+        this.conn.invoke("CreateRoom", this.roomName);
+    }
+
+    clickJoinRoom(room) {
+        this.conn.invoke("JoinRoom", room.name);
     }
 
     render() {

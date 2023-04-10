@@ -24,7 +24,7 @@ namespace Server.Controllers
         public string GetRoomsList()
         {
             if (!GetUser(out User user, _context)) return NavigateToLogin();
-            return JsonSerializer.Serialize(game.getRoomLists());
+            return JsonSerializer.Serialize(game.GetRoomLists());
         }
     }
 }

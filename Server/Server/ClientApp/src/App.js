@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import { Route, Routes } from 'react-router-dom';
+import { Route, Routes, useNavigate } from 'react-router-dom';
 
 import { FetchManager } from './components/managers/FetchManager';
 import ConnectionManager from './components/managers/ConnectionManager';
@@ -11,12 +11,17 @@ import { GameWithRoute } from "./components/layouts/game/Game";
 
 import './App.css';
 
+export function AppWithRoute(props) {
+    const navigate = useNavigate();
+    return (<App navigate={navigate} {...props}></App>);
+}
+
 export default class App extends Component {
 
-    constructor() {
-        super();
+    constructor(props) {
+        super(props);
         this.conn = new ConnectionManager();
-        this.conn.open();
+        this.conn.open(props.navigate);
     }
 
     static displayName = App.name;

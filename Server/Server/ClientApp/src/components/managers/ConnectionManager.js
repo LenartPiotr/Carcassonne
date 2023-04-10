@@ -9,19 +9,21 @@ const connection = new signalR.HubConnectionBuilder()
     //.configureLogging(signalR.LogLevel.Debug)
     .build();
 
-// console.log(connection);
-
 const _afterOpen = []
 
 export default class ConnectionManager {
 
-    open(callback, error) {
+    open(navigate, callback, error) {
         connection.start().then(() => {
             if (callback != undefined) callback();
             for (let i in _afterOpen) {
                 _afterOpen[i]();
             }
-            _afterOpen = [];
+            _afterOpen.splice(0, _afterOpen.length);
+            connection.on("Navigate", (path) => {
+                navigate(path);
+            });
+            setInterval(() => connection.invoke("Ping"), 500);
         }).catch(err => {
             if (error != undefined) error(err);
         });
@@ -34,10 +36,12 @@ export default class ConnectionManager {
             var send = () => {
                 this.invoke('Join', guid);
             }
-            this.on('Connection', success => {
-                if (!success) { if (--count > 0) send(); return; }
+            var func = success => {
+                if (!success) { if (--count > 0) send(); else this.off('Connection', func); return; }
                 if (callback != undefined) callback();
-            });
+                this.off('Connection', func);
+            };
+            this.on('Connection', func);
             send();
         });
     }
