@@ -1,5 +1,6 @@
 using Microsoft.AspNetCore.Http.Connections;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Options;
 using MySqlConnector;
 using Server.DatabaseContext;
 using Server.Services.CarcassoneGame;
@@ -23,6 +24,10 @@ builder.Services.AddDbContext<AppDatabaseContext>(
 
 builder.Services.AddControllersWithViews();
 
+// Use swagger
+builder.Services.AddEndpointsApiExplorer();
+builder.Services.AddSwaggerGen();
+
 // Use session
 builder.Services.AddDistributedMemoryCache();
 builder.Services.AddSession();
@@ -43,6 +48,13 @@ if (!app.Environment.IsDevelopment())
 {
     app.UseHsts();
 }
+
+app.UseSwagger();
+app.UseSwaggerUI(options =>
+{
+    options.SwaggerEndpoint("/swagger/v1/swagger.json", "v1");
+    options.RoutePrefix = string.Empty;
+});
 
 app.UseHttpsRedirection();
 app.UseStaticFiles();
