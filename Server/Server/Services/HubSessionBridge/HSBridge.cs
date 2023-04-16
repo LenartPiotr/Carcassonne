@@ -24,13 +24,15 @@ namespace Server.Services.HubSessionBridge
         private readonly ICarcassonneGame _game;
 
         private readonly CancellationTokenSource cancellationToken;
+        private readonly ILogger log;
 
-        public HSBridge(ICarcassonneGame game)
+        public HSBridge(ICarcassonneGame game, ILogger<HSBridge> logger)
         {
             RegistrationTime = new TimeSpan(0, 0, 30);
             queue = new List<ReadyToJoin>();
             dictionary = new Dictionary<string, UserData>();
             _game = game;
+            log = logger;
 
             cancellationToken = new();
             var token = cancellationToken.Token;
@@ -43,6 +45,7 @@ namespace Server.Services.HubSessionBridge
                     var toDelete = dictionary.Where(k => k.Value.LastPing < old).ToList();
                     toDelete.ForEach(k =>
                     {
+                        log.LogInformation("Logout user {Nick} with id {Id}", k.Value.User.Nick, k.Key);
                         _game.Disconnect(k.Value.User);
                         dictionary.Remove(k.Key);
                     });
@@ -57,6 +60,7 @@ namespace Server.Services.HubSessionBridge
 
         public string RegisterUser(User user)
         {
+            log.LogInformation("Register user {Nick}", user.Nick);
             RemoveOld();
             var item = queue.Find(i => i.User == user);
             if (item != null) return item.Key;
@@ -66,6 +70,7 @@ namespace Server.Services.HubSessionBridge
             foreach (var i in list)
             {
                 dictionary.Remove(i.Key);
+                log.LogInformation(" + Remove him from dictionary");
             }
             return guid;
         }
@@ -75,6 +80,7 @@ namespace Server.Services.HubSessionBridge
             RemoveOld();
             var item = queue.Find(i => i.Key == key);
             if (item == null) return false;
+            log.LogInformation("Join user {Nick} with id {Id}", item.User.Nick, userIdentity);
             queue.Remove(item);
             dictionary.Remove(userIdentity);
             if (dictionary.Where(k => k.Value.User.IdUser == item.User.IdUser).Any())
