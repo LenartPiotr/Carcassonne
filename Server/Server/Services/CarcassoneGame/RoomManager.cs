@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.SignalR;
+﻿using System.Reflection;
+using Microsoft.AspNetCore.SignalR;
 using Server.Models;
 using Server.SignalRHubs;
 
@@ -36,12 +37,17 @@ namespace Server.Services.CarcassoneGame
         public void Disconnect(User user)
         {
             Players.RemoveAll(data => data.User.IdUser == user.IdUser);
+            if (Players.Count == 0) Game.RemoveRoom(this);
             UpdateUsers();
         }
 
         public void Action(string connectionId, User user, string action, object[] args)
         {
-            //
+            GetType().GetMethods()
+                .FirstOrDefault(m =>
+                    (m.GetCustomAttribute<CarcassonneAction>()?.Name == action && action != "none") ||
+                    (m.Name == action && m.GetCustomAttribute<CarcassonneAction>()?.Name == "none"))
+                ?.Invoke(this, new object[] { connectionId, user, args });
         }
 
         private void UpdateUsers() => Group.SendAsync("UpdateUsers",
@@ -50,7 +56,7 @@ namespace Server.Services.CarcassoneGame
                 Name = p.User.Nick,
                 IsAdmin = p.IsAdmin,
                 Color = p.Color
-            }));
+            }), MaxPlayers);
 
         public static bool Parse(object[] p, params Type[] what)
         {
@@ -61,6 +67,22 @@ namespace Server.Services.CarcassoneGame
             }
             return true;
         }
+
+        #region Actions
+
+        [CarcassonneAction]
+        public void GetUsers(string conn, User user, object[] args)
+        {
+            Game.HubContext.Clients.Client(conn).SendAsync("UpdateUsers",
+                Players.Select(p => new ResponseUserData()
+                {
+                    Name = p.User.Nick,
+                    IsAdmin = p.IsAdmin,
+                    Color = p.Color
+                }), MaxPlayers);
+        }
+
+        #endregion
 
         public class UserData
         {

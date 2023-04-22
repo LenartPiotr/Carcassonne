@@ -53,6 +53,10 @@ export class Lobby extends Component {
         });
     }
 
+    logout(props) {
+        props.fetch(props.navigate, '/security/logout', {}, _ => _);
+    }
+
     createRoom() {
         this.conn.invoke("CreateRoom", this.roomName);
     }
@@ -67,7 +71,10 @@ export class Lobby extends Component {
                 <MLogger message={(addMessage) => { this.addMessage = addMessage; }} />
                 <div className="content">
                     <img src="img/logo.png" className="logo"></img>
-                    <MButton text="Refresh" width="120" click={this.refresh.bind(this,this.props)}></MButton>
+                    <div className="row">
+                        <MButton text="Logout" width="120" click={this.logout.bind(this, this.props)}></MButton>
+                        <MButton text="Refresh" width="120" click={this.refresh.bind(this, this.props)}></MButton>
+                    </div>
                     <MScrollable>
                         {
                             this.state.rooms.map(e => (

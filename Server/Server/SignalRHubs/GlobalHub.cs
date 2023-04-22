@@ -35,6 +35,12 @@ namespace Server.SignalRHubs
 
         public async Task Ping() => _bridge.Ping(Context.ConnectionId);
 
+        public async Task GetNick()
+        {
+            if (GetUserOrNavigate(out User user)) { await Navigate("/"); return; }
+            await Clients.Caller.SendAsync("GetNick", user.Nick);
+        }
+
         #region Private functions
         private async Task Navigate(string path)
         {
@@ -79,7 +85,7 @@ namespace Server.SignalRHubs
             else await SendMessage(false, "Cannot leave room");
         }
 
-        public async Task Room(string action, params object[] args)
+        public async Task RoomAction(string action, object[] args)
         {
             if (GetUserOrNavigate(out User user)) { await Navigate("/"); return; }
             var room = game.GetRoom(user);

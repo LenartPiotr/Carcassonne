@@ -19,27 +19,33 @@ export class Room extends Component {
     constructor() {
         super();
         this.state = {
-            persons: [
-                { name: 'Player 1' },
-                { name: 'MrStrategy' },
-                { name: 'xxx' },
-                {}
-            ],
-            current: 'Player 1'
+            people: [], // name, isAdmin, color
+            current: ''
         }
         this.conn = new ConnectionManager();
     }
 
     componentDidMount() {
-        this.conn.on("UpdateUsers", this.onUpdateUsers);
+        this.conn.on("UpdateUsers", this.onUpdateUsers.bind(this));
+        this.conn.on("GetNick", this.onGetNick.bind(this));
+        this.conn.afterOpen(() => {
+            this.conn.invoke("GetNick");
+            this.conn.invoke("RoomAction", "GetUsers", []);
+        })
     }
 
     componentWillUnmount() {
-        this.conn.off("UpdateUsers", this.onUpdateUsers);
+        this.conn.off("UpdateUsers", this.onUpdateUsers.bind(this));
+        this.conn.off("GetNick", this.onGetNick.bind(this));
     }
 
-    onUpdateUsers(tab) {
-        console.log(tab);
+    onGetNick(myNick) {
+        this.setState({ current: myNick });
+    }
+
+    onUpdateUsers(tab, maxUsers) {
+        while (tab.length < maxUsers) tab.push({});
+        this.setState({ people: tab });
     }
 
     kickSomeone(who) {
@@ -49,14 +55,21 @@ export class Room extends Component {
             this.props.navigate('/lobby');
             return;
         }
-        var persons = this.state.persons;
-        persons.splice(persons.indexOf(who), 1);
-        persons.push({});
-        this.setState({ persons: persons });
+        var people = this.state.people;
+        people.splice(people.indexOf(who), 1);
+        people.push({});
+        this.setState({ people: people });
     }
 
     play() {
         this.props.navigate('/game');
+    }
+
+    imAdmin() {
+        for (let i in this.state.people) {
+            if (this.state.people[i].name == this.state.current) return this.state.people[i].isAdmin;
+        }
+        return false;
     }
 
     render() {
@@ -68,11 +81,11 @@ export class Room extends Component {
                         <div>Room 2</div>
                     </header>
                     <MScrollable>
-                        {this.state.persons.map((p,i) => (
+                        {this.state.people.map((p,i) => (
                             <Room_person
                                 key={ i }
                                 name={ p.name ? p.name : 'Empty' }
-                                button={ p.name ? (this.state.current == p.name ? 'Leave' : 'Kick') : false }
+                                button={(p.name != undefined) ? (this.state.current == p.name ? 'Leave' : false) : false }
                                 click={ this.kickSomeone.bind(this, p) }
                             ></Room_person>
                         )) }

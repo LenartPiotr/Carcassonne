@@ -17,6 +17,7 @@ namespace Server.Services.CarcassoneGame
         public Task<bool> JoinRoom(string connectionId, User user, string name);
         public bool LeaveRoom(string connectionId, User user);
         public void Disconnect(User user);
+        public void RemoveRoom(RoomManager room);
     }
 
     public class CarcassonneGame : ICarcassonneGame
@@ -70,6 +71,8 @@ namespace Server.Services.CarcassoneGame
             if (list.Count != 1) return false;
             var room = list[0];
 
+            if (room.MaxPlayers <= room.Players.Count) return false;
+
             await HubContext.Groups.AddToGroupAsync(connectionId, name);
             room.Join(user);
 
@@ -94,6 +97,11 @@ namespace Server.Services.CarcassoneGame
         {
             rooms.Where(r => r.Players.Where(d => d.User.IdUser == user.IdUser).Any())
                 .ToList().ForEach(r => r.Disconnect(user));
+        }
+
+        public void RemoveRoom(RoomManager room)
+        {
+            rooms.Remove(room);
         }
     }
 }

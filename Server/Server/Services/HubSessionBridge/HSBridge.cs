@@ -70,6 +70,7 @@ namespace Server.Services.HubSessionBridge
             foreach (var i in list)
             {
                 dictionary.Remove(i.Key);
+                _game.Disconnect(i.Value.User);
                 log.LogInformation(" + Remove him from dictionary");
             }
             return guid;
@@ -82,10 +83,13 @@ namespace Server.Services.HubSessionBridge
             if (item == null) return false;
             log.LogInformation("Join user {Nick} with id {Id}", item.User.Nick, userIdentity);
             queue.Remove(item);
-            dictionary.Remove(userIdentity);
+            if (dictionary.TryGetValue(userIdentity, out UserData? data))
+            {
+                _game.Disconnect(data.User);
+                dictionary.Remove(userIdentity);
+            }
             if (dictionary.Where(k => k.Value.User.IdUser == item.User.IdUser).Any())
                 // There is another device logged in as the same user
-                // Cancel this request or logout him
                 return false;
             dictionary.Add(userIdentity, new UserData(item.User));
             return true;

@@ -13,9 +13,14 @@ namespace Server.Controllers
             HttpContext.Session.SetString("nick", user.Nick);
             HttpContext.Session.SetInt32("authorized", 1);
         }
+        protected void DeleteSession()
+        {
+            HttpContext.Session.SetInt32("authorized", 0);
+        }
         protected bool GetUser(out User user, AppDatabaseContext context)
         {
-            if (HttpContext.Session.GetInt32("authorized") == null)
+            int? authorized = HttpContext.Session.GetInt32("authorized");
+            if (authorized == null || authorized == 0)
             {
                 user = new User();
                 return false;

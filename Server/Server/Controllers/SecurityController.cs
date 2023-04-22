@@ -74,6 +74,14 @@ namespace Server.Controllers
         }
 
         [HttpPost]
+        [Route("logout")]
+        public string Logout()
+        {
+            DeleteSession();
+            return JsonSerializer.Serialize(new StatusResponse() { Success = true, Message = "ok", Navigate = "/" });
+        }
+
+        [HttpPost]
         [Route("getguid")]
         public string GetGuid()
         {
