@@ -48,21 +48,8 @@ export class Room extends Component {
         this.setState({ people: tab });
     }
 
-    kickSomeone(who) {
-        // CHANGE
-        if (who.name == undefined) return;
-        if (who.name == this.state.current) {
-            this.props.navigate('/lobby');
-            return;
-        }
-        var people = this.state.people;
-        people.splice(people.indexOf(who), 1);
-        people.push({});
-        this.setState({ people: people });
-    }
-
     play() {
-        this.props.navigate('/game');
+        this.conn.invoke("RoomAction", "StartGame", []);
     }
 
     imAdmin() {
@@ -70,6 +57,10 @@ export class Room extends Component {
             if (this.state.people[i].name == this.state.current) return this.state.people[i].isAdmin;
         }
         return false;
+    }
+
+    leaveRoom() {
+        this.conn.invoke("LeaveRoom");
     }
 
     render() {
@@ -86,7 +77,7 @@ export class Room extends Component {
                                 key={ i }
                                 name={ p.name ? p.name : 'Empty' }
                                 button={(p.name != undefined) ? (this.state.current == p.name ? 'Leave' : false) : false }
-                                click={ this.kickSomeone.bind(this, p) }
+                                click={this.leaveRoom.bind(this) }
                             ></Room_person>
                         )) }
                     </MScrollable>

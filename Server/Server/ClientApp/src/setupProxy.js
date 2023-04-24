@@ -8,7 +8,8 @@ const context =  [
     "/security",
     "/hub",
     "/lobby",
-    "/swagger"
+    "/swagger",
+    "/graphics"
 ];
 
 module.exports = function(app) {

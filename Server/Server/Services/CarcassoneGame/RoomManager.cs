@@ -1,6 +1,8 @@
 ﻿using System.Reflection;
 using Microsoft.AspNetCore.SignalR;
 using Server.Models;
+using Server.Services.CarcassoneGame.GameEngines;
+using Server.Services.CarcassoneGame.GameEngines.Components;
 using Server.SignalRHubs;
 
 namespace Server.Services.CarcassoneGame
@@ -9,6 +11,9 @@ namespace Server.Services.CarcassoneGame
     {
         private ICarcassonneGame Game { get; }
         private IClientProxy Group => Game.HubContext.Clients.Group(Name);
+
+        private List<string> Colors { get; }
+        private GameEngine? Engine { get; set; }
 
         public string Name { get; }
         public int MaxPlayers { get; private set; }
@@ -21,6 +26,8 @@ namespace Server.Services.CarcassoneGame
             MaxPlayers = 4;
             Players = new List<UserData>();
             Game = game;
+            Colors = new List<string>() { "#ff0000", "#00ff00", "#0000ff", "#ffff00", "#ff00ff", "#00ffff" };
+            Engine = null;
         }
 
         public void Join(User user)
@@ -29,7 +36,7 @@ namespace Server.Services.CarcassoneGame
             {
                 User = user,
                 IsAdmin = Players.Count == 0,
-                Color = "red"
+                Color = TakeFreeColor()
             });
             UpdateUsers();
         }
@@ -50,6 +57,16 @@ namespace Server.Services.CarcassoneGame
                 ?.Invoke(this, new object[] { connectionId, user, args });
         }
 
+        public void GameAction(string connectionId, User user, string action, object[] args)
+        {
+            if (Engine == null) return;
+            typeof(GameEngine).GetMethods()
+                .FirstOrDefault(m =>
+                    (m.GetCustomAttribute<CarcassonneAction>()?.Name == action && action != "none") ||
+                    (m.Name == action && m.GetCustomAttribute<CarcassonneAction>()?.Name == "none"))
+                ?.Invoke(Engine, new object[] { connectionId, user, args });
+        }
+
         private void UpdateUsers() => Group.SendAsync("UpdateUsers",
             Players.Select(p => new ResponseUserData()
             {
@@ -57,6 +74,19 @@ namespace Server.Services.CarcassoneGame
                 IsAdmin = p.IsAdmin,
                 Color = p.Color
             }), MaxPlayers);
+
+        bool IsAdmin(User user) => Players.Any(p => p.IsAdmin && p.User.IdUser == user.IdUser);
+        string TakeFreeColor()
+        {
+            foreach (string color in Colors)
+            {
+                if (!Players.Any(p => p.Color == color))
+                {
+                    return color;
+                }
+            }
+            return "#ffffff";
+        }
 
         public static bool Parse(object[] p, params Type[] what)
         {
@@ -80,6 +110,21 @@ namespace Server.Services.CarcassoneGame
                     IsAdmin = p.IsAdmin,
                     Color = p.Color
                 }), MaxPlayers);
+        }
+
+        [CarcassonneAction]
+        public void StartGame(string conn, User user, object[] args)
+        {
+            if (!IsAdmin(user)) return;
+            if (Engine == null)
+            {
+                Engine = new GameEngine(Name, Game.HubContext, new List<IGameComponent>()
+                {
+                    new BaseComponent()
+                }, Players.Select(p => new GameEngines.UserData(p.User, p.Color)).ToList());
+                
+                Group.SendAsync("Navigate", "/game");
+            }
         }
 
         #endregion

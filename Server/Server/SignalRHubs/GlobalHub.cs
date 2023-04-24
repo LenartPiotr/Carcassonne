@@ -92,6 +92,14 @@ namespace Server.SignalRHubs
             if (room == null) return;
             room.Action(Context.ConnectionId, user, action, args);
         }
+
+        public async Task GameAction(string action, object[] args)
+        {
+            if (GetUserOrNavigate(out User user)) { await Navigate("/"); return; }
+            var room = game.GetRoom(user);
+            if (room == null) return;
+            room.GameAction(Context.ConnectionId, user, action, args);
+        }
         #endregion
     }
 }
