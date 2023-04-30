@@ -53,7 +53,7 @@ namespace Server.Services.CarcassoneGame
 
         public async Task<bool> CreateRoom(string connectionId, User user, string name)
         {
-            if (!new Regex(@"^[a-zA-Z]*$").IsMatch(name)) return false;
+            if (!new Regex(@"^[a-zA-Z]{2,10}$").IsMatch(name)) return false;
             if (rooms.Where(r => r.Players.Where(d => d.User.IdUser == user.IdUser).Any() || r.Name == name).Any()) return false;
             
             RoomManager room = new(name, this);

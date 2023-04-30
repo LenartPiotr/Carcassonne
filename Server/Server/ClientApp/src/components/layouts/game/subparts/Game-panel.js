@@ -14,8 +14,10 @@ export class Game_panel extends Component {
         return (
             <div className="Game-panel">
                 <MScrollable>
+                    { this.props.children }
                 </MScrollable>
-                <img src={ this.props.img ?? "" } alt="" />
+                <div>Current piece:</div>
+                <img src={this.props.img ?? ""} alt="" style={{ width: "90%", height: "auto" }} />
             </div>
         );
     }

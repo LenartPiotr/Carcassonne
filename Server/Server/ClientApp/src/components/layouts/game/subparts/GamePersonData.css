@@ -1,0 +1,44 @@
+﻿.GamePersonData{
+    display: flex;
+    justify-content: flex-start;
+    flex-direction: row;
+    min-height: 80px;
+}
+
+.GamePersonData > .turn{
+    width: 20px;
+    min-width: 20px;
+    align-self: stretch;
+}
+
+.GamePersonData > .turn.active {
+    background: linear-gradient(90deg, rgba(255,255,0,1) 0%, rgba(255,255,255,0) 100%);
+}
+
+.GamePersonData > .data{
+    flex-grow: 1;
+}
+
+.GamePersonData > .data > :first-child{
+    display: flex;
+    justify-content: flex-start;
+    align-items: center;
+    flex-direction: row;
+}
+
+.GamePersonData > .data > :first-child > :first-child{
+    width: 15px;
+    height: 15px;
+    border-radius: 100%;
+    margin-right: 10px;
+}
+
+.GamePersonData > .score{
+    margin-right: 10px;
+    display: flex;
+    justify-content: center;
+    align-content: center;
+    flex-direction: column;
+    color: yellow;
+    font-size: 28px;
+}

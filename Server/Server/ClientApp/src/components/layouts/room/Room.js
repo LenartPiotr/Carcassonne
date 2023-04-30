@@ -20,23 +20,32 @@ export class Room extends Component {
         super();
         this.state = {
             people: [], // name, isAdmin, color
-            current: ''
+            current: '',
+            roomName: 'Room'
         }
         this.conn = new ConnectionManager();
+        this.bindings = {
+            "UpdateUsers": this.onUpdateUsers.bind(this),
+            "GetNick": this.onGetNick.bind(this),
+            "GetRoomName": this.onRoomName.bind(this),
+        };
     }
 
     componentDidMount() {
-        this.conn.on("UpdateUsers", this.onUpdateUsers.bind(this));
-        this.conn.on("GetNick", this.onGetNick.bind(this));
+        for (let action in this.bindings) {
+            this.conn.on(action, this.bindings[action]);
+        }
         this.conn.afterOpen(() => {
             this.conn.invoke("GetNick");
             this.conn.invoke("RoomAction", "GetUsers", []);
+            this.conn.invoke("RoomAction", "GetRoomName", []);
         })
     }
 
     componentWillUnmount() {
-        this.conn.off("UpdateUsers", this.onUpdateUsers.bind(this));
-        this.conn.off("GetNick", this.onGetNick.bind(this));
+        for (let action in this.bindings) {
+            this.conn.off(action, this.bindings[action]);
+        }
     }
 
     onGetNick(myNick) {
@@ -46,6 +55,10 @@ export class Room extends Component {
     onUpdateUsers(tab, maxUsers) {
         while (tab.length < maxUsers) tab.push({});
         this.setState({ people: tab });
+    }
+
+    onRoomName(roomName) {
+        this.setState({ roomName: roomName });
     }
 
     play() {
@@ -69,7 +82,7 @@ export class Room extends Component {
                 <div className="content">
                     <header>
                         <img src="img/token.png" className="logo"></img>
-                        <div>Room 2</div>
+                        <div>{ this.state.roomName }</div>
                     </header>
                     <MScrollable>
                         {this.state.people.map((p,i) => (

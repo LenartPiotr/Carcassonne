@@ -11,6 +11,7 @@ namespace Server.Services.CarcassoneGame
     {
         private ICarcassonneGame Game { get; }
         private IClientProxy Group => Game.HubContext.Clients.Group(Name);
+        private IClientProxy Client(string conn) => Game.HubContext.Clients.Client(conn);
 
         private List<string> Colors { get; }
         private GameEngine? Engine { get; set; }
@@ -103,7 +104,7 @@ namespace Server.Services.CarcassoneGame
         [CarcassonneAction]
         public void GetUsers(string conn, User user, object[] args)
         {
-            Game.HubContext.Clients.Client(conn).SendAsync("UpdateUsers",
+            Client(conn).SendAsync("UpdateUsers",
                 Players.Select(p => new ResponseUserData()
                 {
                     Name = p.User.Nick,
@@ -125,6 +126,12 @@ namespace Server.Services.CarcassoneGame
                 
                 Group.SendAsync("Navigate", "/game");
             }
+        }
+
+        [CarcassonneAction]
+        public void GetRoomName(string conn, User user, object[] args)
+        {
+            Client(conn).SendAsync("GetRoomName", this.Name);
         }
 
         #endregion
