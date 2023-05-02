@@ -8,5 +8,6 @@ namespace Server.Services.CarcassoneGame.GameEngines.Components
         public void AddDataToDictionary(UserData data, Dictionary<string, object> response);
         public List<IPuzzle> GetOrderedPuzzles();
         public List<IPuzzle> GetPuzzles();
+        public bool CanPlace(IPuzzle firstPuzzle, Direction firstPuzzleDirection, IPuzzle secondPuzzle, Direction secondPuzzleDirection);
     }
 }

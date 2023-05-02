@@ -1,5 +1,6 @@
 ﻿using System.Reflection;
 using Microsoft.AspNetCore.SignalR;
+using Org.BouncyCastle.Asn1.Ocsp;
 using Server.Models;
 using Server.Services.CarcassoneGame.GameEngines;
 using Server.Services.CarcassoneGame.GameEngines.Components;
@@ -55,7 +56,7 @@ namespace Server.Services.CarcassoneGame
                 .FirstOrDefault(m =>
                     (m.GetCustomAttribute<CarcassonneAction>()?.Name == action && action != "none") ||
                     (m.Name == action && m.GetCustomAttribute<CarcassonneAction>()?.Name == "none"))
-                ?.Invoke(this, new object[] { connectionId, user, args });
+                ?.Invoke(this, new object[] { new Request(connectionId, user, args) });
         }
 
         public void GameAction(string connectionId, User user, string action, object[] args)
@@ -65,7 +66,7 @@ namespace Server.Services.CarcassoneGame
                 .FirstOrDefault(m =>
                     (m.GetCustomAttribute<CarcassonneAction>()?.Name == action && action != "none") ||
                     (m.Name == action && m.GetCustomAttribute<CarcassonneAction>()?.Name == "none"))
-                ?.Invoke(Engine, new object[] { connectionId, user, args });
+                ?.Invoke(Engine, new object[] { new Request(connectionId, user, args) });
         }
 
         private void UpdateUsers() => Group.SendAsync("UpdateUsers",
@@ -102,9 +103,9 @@ namespace Server.Services.CarcassoneGame
         #region Actions
 
         [CarcassonneAction]
-        public void GetUsers(string conn, User user, object[] args)
+        public void GetUsers(Request r)
         {
-            Client(conn).SendAsync("UpdateUsers",
+            Client(r.Conn).SendAsync("UpdateUsers",
                 Players.Select(p => new ResponseUserData()
                 {
                     Name = p.User.Nick,
@@ -114,9 +115,9 @@ namespace Server.Services.CarcassoneGame
         }
 
         [CarcassonneAction]
-        public void StartGame(string conn, User user, object[] args)
+        public void StartGame(Request r)
         {
-            if (!IsAdmin(user)) return;
+            if (!IsAdmin(r.User)) return;
             if (Engine == null)
             {
                 Engine = new GameEngine(Name, Game.HubContext, new List<IGameComponent>()
@@ -129,9 +130,9 @@ namespace Server.Services.CarcassoneGame
         }
 
         [CarcassonneAction]
-        public void GetRoomName(string conn, User user, object[] args)
+        public void GetRoomName(Request r)
         {
-            Client(conn).SendAsync("GetRoomName", this.Name);
+            Client(r.Conn).SendAsync("GetRoomName", Name);
         }
 
         #endregion
@@ -148,6 +149,30 @@ namespace Server.Services.CarcassoneGame
             public string Name { get; set; }
             public bool IsAdmin { get; set; }
             public string Color { get; set; }
+        }
+
+        public class Request
+        {
+            public string Conn { get; set; }
+            public User User { get; set; }
+            public object[] Args { get; set; }
+
+            public Request(string conn, User user, object[] args)
+            {
+                Conn = conn;
+                User = user;
+                Args = args;
+            }
+
+            public bool ParseArgs(Type[] requied)
+            {
+                if (requied.Length > Args.Length) return false;
+                for (int i = 0; i < Args.Length; i++)
+                {
+                    if (!Args[i].GetType().Equals(requied[i])) return false;
+                }
+                return true;
+            }
         }
     }
 }

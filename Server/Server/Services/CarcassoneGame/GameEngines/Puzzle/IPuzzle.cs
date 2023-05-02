@@ -9,5 +9,6 @@ namespace Server.Services.CarcassoneGame.GameEngines.Puzzle
         Bitmap GetBitmap();
         string GetBitmapData();
         bool IsChurch();
+        void Rotate(int quarters);
     }
 }

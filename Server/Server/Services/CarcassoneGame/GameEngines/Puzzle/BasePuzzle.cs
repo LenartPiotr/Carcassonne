@@ -30,6 +30,14 @@ namespace Server.Services.CarcassoneGame.GameEngines.Puzzle
                 ((int)connections[0]).ToString() + ((int)connections[1]).ToString() + ((int)connections[2]).ToString() + ((int)connections[3]).ToString();
         }
 
+        public BasePuzzle()
+        {
+            connections = new PuzzleConnectionEnum[] { PuzzleConnectionEnum.Grass, PuzzleConnectionEnum.Grass, PuzzleConnectionEnum.Grass, PuzzleConnectionEnum.Grass };
+            isChurch = false;
+            isCastlseOne = false;
+            isPathEnd = false;
+        }
+
         public BasePuzzle(PuzzleConnectionEnum[] connections, bool haveChurch, bool oneCastle)
         {
             this.connections = connections;
@@ -79,6 +87,19 @@ namespace Server.Services.CarcassoneGame.GameEngines.Puzzle
         public bool IsChurch()
         {
             return isChurch;
+        }
+
+        public void Rotate(int quarters)
+        {
+            for (int r = 0; r < quarters; r++)
+            {
+                PuzzleConnectionEnum last = connections[3];
+                for (int i = 3; i >= 1; i--)
+                {
+                    connections[i] = connections[i - 1];
+                }
+                connections[0] = last;
+            }
         }
     }
 }

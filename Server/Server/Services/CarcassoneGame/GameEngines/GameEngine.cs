@@ -6,6 +6,7 @@ using Server.Services.CarcassoneGame.GameEngines.Components;
 using Server.Services.CarcassoneGame.GameEngines.Puzzle;
 using Server.Services.CarcassoneGame.ResponseModels;
 using Server.SignalRHubs;
+using static Server.Services.CarcassoneGame.RoomManager;
 
 namespace Server.Services.CarcassoneGame.GameEngines
 {
@@ -21,6 +22,8 @@ namespace Server.Services.CarcassoneGame.GameEngines
         List<UserData> Users { get; }
         List<IPuzzle> Puzzles { get; }
 
+        Board<IPuzzle> board;
+
         int turnIndex;
 
         public GameEngine(string name, IHubContext<GlobalHub> hub, List<IGameComponent> components, List<UserData> users)
@@ -30,6 +33,7 @@ namespace Server.Services.CarcassoneGame.GameEngines
 
             Components = components;
             Users = users;
+            board = new();
             components.ForEach(c => c.Init(users));
 
             Puzzles = new List<IPuzzle>();
@@ -42,10 +46,24 @@ namespace Server.Services.CarcassoneGame.GameEngines
             turnIndex = 0;
         }
 
-        [CarcassonneAction]
-        public void GetPlayersData(string conn, User user, object[] args)
+        private bool GetPuzzleFromData(string data, int rot, out IPuzzle puzzle)
         {
-            Client(conn).SendAsync("GetPlayersData", new GameUsersDataResponse()
+            try
+            {
+                switch (data[0])
+                {
+                    case 'B': puzzle = new BasePuzzle(data); puzzle.Rotate(rot); return true;
+                }
+            }
+            catch { }
+            puzzle = new BasePuzzle();
+            return false;
+        }
+
+        [CarcassonneAction]
+        public void GetPlayersData(Request r)
+        {
+            Client(r.Conn).SendAsync("GetPlayersData", new GameUsersDataResponse()
             {
                 Users = Users.Select(u =>
                 {
@@ -63,13 +81,50 @@ namespace Server.Services.CarcassoneGame.GameEngines
         }
 
         [CarcassonneAction]
-        public void GetGameStage(string conn, User user, object[] args)
+        public void GetGameStage(Request r)
         {
-            Client(conn).SendAsync("PlacePiece", new GamePlacePieceResponse()
+            Client(r.Conn).SendAsync("PlacePiece", new GamePlacePieceResponse()
             {
                 PlayerTurnNick = Users[turnIndex].User.Nick,
                 Bitmap = Puzzles[0].GetBitmapData()
             });
+        }
+
+        [CarcassonneAction]
+        public void PlacePuzzle(Request r)
+        {
+            if (r.User.IdUser != Users[turnIndex].User.IdUser) return;
+            if (!r.ParseArgs(new Type[] { typeof(string), typeof(int), typeof(int), typeof(int) })) return;
+            string pieceData = (string)r.Args[0];
+            int x = (int)r.Args[1];
+            int y = (int)r.Args[2];
+            int rot = (int)r.Args[3];
+
+            // Check if board has empty place
+            if (board[x, y] != null) return;
+
+            // Check if puzzle data if corrent
+            if (!GetPuzzleFromData(pieceData, rot, out IPuzzle puzzle)) return;
+
+            // Check if can connect with others
+            int connectionsCount = 0;
+            foreach (Direction direction in Enum.GetValues(typeof(Direction)))
+            {
+                IPuzzle? puzzleInDirection = board[x + direction.GetX(), y + direction.GetY()];
+                if (puzzleInDirection == null) continue;
+                foreach (IGameComponent component in Components)
+                    if (!component.CanPlace(puzzleInDirection, direction.Opposite(), puzzle, direction)) return;
+            }
+
+            // Check if any connection or first puzzle
+            if (connectionsCount == 0 && !board.Empty) return;
+
+            // Place
+            board[x, y] = puzzle;
+
+            // TODO BROADCAST
+
+            // CHANGE TURN
         }
     }
 }

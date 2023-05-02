@@ -61,5 +61,10 @@ namespace Server.Services.CarcassoneGame.GameEngines.Components
             };
             return puzzles.Select(s => GetPuzzleFromPhrase(s)).ToList();
         }
+
+        public bool CanPlace(IPuzzle firstPuzzle, Direction firstPuzzleDirection, IPuzzle secondPuzzle, Direction secondPuzzleDirection)
+        {
+            return firstPuzzle.GetConnection(firstPuzzleDirection) == secondPuzzle.GetConnection(secondPuzzleDirection);
+        }
     }
 }
