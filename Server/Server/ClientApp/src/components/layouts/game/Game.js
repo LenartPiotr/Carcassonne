@@ -24,23 +24,18 @@ export class Game extends Component {
                 { name: 'Player 1', score: 15, data: { pawnsCount: 10 }, color: '#ff0000' }
             ],
             turn: 'Admin',
-            board: [
-                { bitmap: 'Bfff1100', x: -1, y: -1, r: 1 },
-                { bitmap: 'Bfff0101', x: 0, y: -1, r: 0 },
-                { bitmap: 'Bfff1100', x: 1, y: -1, r: 2 },
-                { bitmap: 'Bfff1122', x: -1, y: 0, r: 3 },
-                { bitmap: 'Bfft0022', x: 0, y: 0, r: 0 },
-                { bitmap: 'Bfff1010', x: 1, y: 0, r: 0 },
-                { bitmap: 'Bfft2200', x: -1, y: 1, r: 0 },
-                { bitmap: 'Bfft2002', x: 0, y: 1, r: 0 },
-                { bitmap: 'Bttt1000', x: 1, y: 1, r: 0 },
-            ],
-            currentImg: ''
+            action: '',
+            myName: '-',
+            board: [],
+            currentImg: '',
         };
+        this.rawBitmapData = '';
         this.conn = new ConnectionManager();
         this.bindings = {
             "GetPlayersData": this.getPlayersData.bind(this),
-            "PlacePiece": this.placePiece.bind(this)
+            "PlacePiece": this.placePiece.bind(this),
+            "GetNick": this.getNick.bind(this),
+            "PlacePuzzle": this.placePuzzle.bind(this),
         };
     }
 
@@ -51,6 +46,7 @@ export class Game extends Component {
         this.conn.afterOpen(() => {
             this.conn.invoke("GameAction", "GetPlayersData", []);
             this.conn.invoke("GameAction", "GetGameStage", []);
+            this.conn.invoke("GetNick");
         });
     }
 
@@ -60,27 +56,33 @@ export class Game extends Component {
         }
     }
 
+    clickOnPiece(x, y, rot) {
+        if (this.state.action == 'placePiece' && this.state.turn == this.state.myName) {
+            this.conn.invoke("GameAction", "PlacePuzzle", [this.rawBitmapData, x, y, rot]);
+        }
+    }
+
+    // Responces
+
     getPlayersData(data) {
         if (data.success) this.setState({ playersInfo: data.users });
     }
 
     placePiece(data) {
-        this.setState({ currentImg: '/graphics/bitmap?name=' + data.bitmap, turn: data.playerTurnNick });
-        /*fetch('/graphics/bitmap?name=' + data.bitmap)
-            .then(response => {
-                if (response.ok) {
-                    return response.blob();
-                }
-                throw new Error('Network response was not ok.');
-            })
-            .then(blob => {
-                const url = URL.createObjectURL(blob);
-                console.log(url);
-                this.setState({ currentImg: url });
-            })
-            .catch(error => {
-                console.error('There has been a problem with your fetch operation:', error);
-            });*/
+        this.setState({ currentImg: '/graphics/bitmap?name=' + data.bitmap, turn: data.playerTurnNick, action: 'placePiece' });
+        this.rawBitmapData = data.bitmap;
+    }
+
+    getNick(nick) {
+        this.setState({ myName: nick });
+    }
+
+    placePuzzle(data) {
+        console.log("place", data.bitmapData, data.x, data.y);
+        if (!data.success) return;
+        var board = this.state.board;
+        board.push({ bitmap: data.bitmapData, x: data.x, y: data.y, r: 0 });
+        this.setState({ board: board });
     }
 
     render() {
@@ -91,7 +93,11 @@ export class Game extends Component {
                         <GamePersonData name={p.name} color={p.color} score={p.score} pawns={p.data.pawnsCount} key={i} turn={this.state.turn == p.name} />
                     ))}
                 </Game_panel>
-                <Board pieces={this.state.board} currentImg={this.state.currentImg} />
+                <Board
+                    pieces={this.state.board}
+                    currentImg={this.state.currentImg}
+                    click={this.clickOnPiece.bind(this)}
+                    ghost={this.state.action == 'placePiece' && this.state.turn == this.state.myName} />
             </div>
         );
     }

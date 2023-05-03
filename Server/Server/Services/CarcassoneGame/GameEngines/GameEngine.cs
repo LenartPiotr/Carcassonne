@@ -1,4 +1,5 @@
 ﻿using System.Drawing.Imaging;
+using System.Text.Json;
 using Microsoft.AspNetCore.SignalR;
 using Server.Extensions;
 using Server.Models;
@@ -94,11 +95,18 @@ namespace Server.Services.CarcassoneGame.GameEngines
         public void PlacePuzzle(Request r)
         {
             if (r.User.IdUser != Users[turnIndex].User.IdUser) return;
-            if (!r.ParseArgs(new Type[] { typeof(string), typeof(int), typeof(int), typeof(int) })) return;
-            string pieceData = (string)r.Args[0];
-            int x = (int)r.Args[1];
-            int y = (int)r.Args[2];
-            int rot = (int)r.Args[3];
+            string pieceData;
+            int x, y, rot;
+            try
+            {
+                pieceData = ((JsonElement)r.Args[0]).GetString() ?? throw new Exception();
+                x = ((JsonElement)r.Args[1]).GetInt32();
+                y = ((JsonElement)r.Args[2]).GetInt32();
+                rot = ((JsonElement)r.Args[3]).GetInt32();
+            }
+            catch { return; }
+            
+            if (pieceData != Puzzles[0].GetBitmapData()) return;
 
             // Check if board has empty place
             if (board[x, y] != null) return;
@@ -112,6 +120,7 @@ namespace Server.Services.CarcassoneGame.GameEngines
             {
                 IPuzzle? puzzleInDirection = board[x + direction.GetX(), y + direction.GetY()];
                 if (puzzleInDirection == null) continue;
+                connectionsCount++;
                 foreach (IGameComponent component in Components)
                     if (!component.CanPlace(puzzleInDirection, direction.Opposite(), puzzle, direction)) return;
             }
@@ -119,12 +128,24 @@ namespace Server.Services.CarcassoneGame.GameEngines
             // Check if any connection or first puzzle
             if (connectionsCount == 0 && !board.Empty) return;
 
-            // Place
             board[x, y] = puzzle;
 
-            // TODO BROADCAST
+            Group.SendAsync("PlacePuzzle", new GamePlacePuzzleResponse()
+            {
+                BitmapData = puzzle.GetBitmapData(),
+                X = x,
+                Y = y
+            });
 
-            // CHANGE TURN
+            // Change turn
+            turnIndex = (turnIndex + 1) % Users.Count;
+            Puzzles.RemoveAt(0);
+
+            Group.SendAsync("PlacePiece", new GamePlacePieceResponse()
+            {
+                PlayerTurnNick = Users[turnIndex].User.Nick,
+                Bitmap = Puzzles[0].GetBitmapData()
+            });
         }
     }
 }

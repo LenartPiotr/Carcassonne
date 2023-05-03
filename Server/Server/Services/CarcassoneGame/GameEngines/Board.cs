@@ -2,7 +2,7 @@
 {
     public class Board<T>
     {
-        private readonly Dictionary<int, Dictionary<int, T?>> tab;
+        private readonly Dictionary<int, Dictionary<int, T>> tab;
 
         public bool Empty => tab.Count == 0;
 
@@ -15,9 +15,10 @@
         {
             set
             {
+                if (value == null) return;
                 if (!tab.ContainsKey(x))
                 {
-                    tab.Add(x, new Dictionary<int, T?>());
+                    tab.Add(x, new Dictionary<int, T>());
                     tab[x].Add(y, value);
                     return;
                 }

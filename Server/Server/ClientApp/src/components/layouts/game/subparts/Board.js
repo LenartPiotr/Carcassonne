@@ -29,6 +29,10 @@ export class Board extends Component {
 
     mouseMove(e) {
         if (!this.state.isDragging) {
+            if (!this.props.ghost) {
+                if (this.state.ghost !== false) this.setState({ ghost: false });
+                return;
+            }
             var x = Math.floor((this.state.currentX + e.clientX) / this.state.size);
             var y = Math.floor((this.state.currentY + e.clientY) / this.state.size);
             if (this.state.ghost == false || this.state.ghost.x != x || this.state.ghost.y != y) {
@@ -59,7 +63,9 @@ export class Board extends Component {
     mouseUp(e) {
         this.setState({ isDragging: false });
         if (this.moved < 10) {
-            // click
+            var x = Math.floor((this.state.currentX + e.clientX) / this.state.size);
+            var y = Math.floor((this.state.currentY + e.clientY) / this.state.size);
+            this.props.click(x, y, this.state.ghostR);
         }
     }
 

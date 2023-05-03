@@ -25,13 +25,13 @@
         public static int GetX(this Direction direction)
         {
             int n = (int)direction;
-            if (n % 2 == 0) return -n + 1;
+            if (n % 2 != 0) return -n + 2;
             return 0;
         }
         public static int GetY(this Direction direction)
         {
             int n = (int)direction;
-            if (n % 2 != 0) return -n + 2;
+            if (n % 2 == 0) return n - 1;
             return 0;
         }
     }
