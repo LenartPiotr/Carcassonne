@@ -22,6 +22,7 @@ export default class App extends Component {
         super(props);
         this.conn = new ConnectionManager();
         this.conn.open(props.navigate);
+        this.conn.afterOpen(this.conn.join.bind(this.conn, FetchManager, props.navigate, () => { }));
     }
 
     static displayName = App.name;

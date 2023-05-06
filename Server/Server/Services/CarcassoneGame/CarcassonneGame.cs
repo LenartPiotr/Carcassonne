@@ -18,6 +18,7 @@ namespace Server.Services.CarcassoneGame
         public bool LeaveRoom(string connectionId, User user);
         public void Disconnect(User user);
         public void RemoveRoom(RoomManager room);
+        public void ReAddConnection(string connectionId, User user);
     }
 
     public class CarcassonneGame : ICarcassonneGame
@@ -102,6 +103,12 @@ namespace Server.Services.CarcassoneGame
         public void RemoveRoom(RoomManager room)
         {
             rooms.Remove(room);
+        }
+
+        public void ReAddConnection(string connectionId, User user)
+        {
+            rooms.Where(r => r.Players.Where(d => d.User.IdUser == user.IdUser).Any())
+                .ToList().ForEach(r => HubContext.Groups.AddToGroupAsync(connectionId, r.Name));
         }
     }
 }

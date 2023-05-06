@@ -66,13 +66,17 @@ namespace Server.Services.HubSessionBridge
             if (item != null) return item.Key;
             string guid = Guid.NewGuid().ToString();
             queue.Add(new ReadyToJoin(user, guid));
+            
+            /*
+             * No remove the same user from register but change connection id on join
+             * 
             var list = dictionary.Where(k => k.Value.User.IdUser == user.IdUser).ToList();
             foreach (var i in list)
             {
                 dictionary.Remove(i.Key);
                 _game.Disconnect(i.Value.User);
                 log.LogInformation(" + Remove him from dictionary");
-            }
+            }*/
             return guid;
         }
 
@@ -88,9 +92,16 @@ namespace Server.Services.HubSessionBridge
                 _game.Disconnect(data.User);
                 dictionary.Remove(userIdentity);
             }
-            if (dictionary.Where(k => k.Value.User.IdUser == item.User.IdUser).Any())
+            var list = dictionary.Where(k => k.Value.User.IdUser == item.User.IdUser);
+            if (list.Any())
+            {
                 // There is another device logged in as the same user
-                return false;
+                foreach (var k in list.ToList())
+                {
+                    dictionary.Remove(k.Key);
+                }
+                _game.ReAddConnection(userIdentity, item.User);
+            }
             dictionary.Add(userIdentity, new UserData(item.User));
             return true;
         }

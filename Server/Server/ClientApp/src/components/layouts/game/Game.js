@@ -43,7 +43,7 @@ export class Game extends Component {
         for (let action in this.bindings) {
             this.conn.on(action, this.bindings[action]);
         }
-        this.conn.afterOpen(() => {
+        this.conn.ready(() => {
             this.conn.invoke("GameAction", "GetPlayersData", []);
             this.conn.invoke("GameAction", "GetGameStage", []);
             this.conn.invoke("GetNick");

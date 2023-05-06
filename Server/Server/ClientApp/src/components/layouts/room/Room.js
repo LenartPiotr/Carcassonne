@@ -35,7 +35,7 @@ export class Room extends Component {
         for (let action in this.bindings) {
             this.conn.on(action, this.bindings[action]);
         }
-        this.conn.afterOpen(() => {
+        this.conn.ready(() => {
             this.conn.invoke("GetNick");
             this.conn.invoke("RoomAction", "GetUsers", []);
             this.conn.invoke("RoomAction", "GetRoomName", []);

@@ -22,7 +22,6 @@ export class Lobby extends Component {
         this.state = {
             rooms: rooms,
             showPanel: false
-
         };
         this.addMessage = _ => _;
 

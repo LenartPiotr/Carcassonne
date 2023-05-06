@@ -10,6 +10,8 @@ const connection = new signalR.HubConnectionBuilder()
     .build();
 
 const _afterOpen = []
+const _afterConn = []
+var _connectedWithPerson = false;
 
 export default class ConnectionManager {
 
@@ -30,7 +32,7 @@ export default class ConnectionManager {
     }
     join(fetch, navigate, callback) {
         fetch(navigate, '/security/getguid', {}, (res) => {
-            if (!res.Success) return console.error("cannot join to bridge");
+            if (!res.Success) return console.error("cannot join to bridge"); // CLOG
             var guid = res.Guid;
             var count = 3;
             var send = () => {
@@ -40,10 +42,18 @@ export default class ConnectionManager {
                 if (!success) { if (--count > 0) send(); else this.off('Connection', func); return; }
                 if (callback != undefined) callback();
                 this.off('Connection', func);
+                _connectedWithPerson = true;
+                for (let i in _afterConn) {
+                    _afterConn[i]();
+                }
             };
             this.on('Connection', func);
             send();
         });
+    }
+    ready(callback) {
+        if (_connectedWithPerson) callback();
+        else _afterConn.push(callback);
     }
     afterOpen(callback) {
         if (connection._connectionState == "Connected") callback();

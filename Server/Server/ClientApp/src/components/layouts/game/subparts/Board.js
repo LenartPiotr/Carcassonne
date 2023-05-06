@@ -63,6 +63,7 @@ export class Board extends Component {
     mouseUp(e) {
         this.setState({ isDragging: false });
         if (this.moved < 10) {
+            if (e.button != 0) return;
             var x = Math.floor((this.state.currentX + e.clientX) / this.state.size);
             var y = Math.floor((this.state.currentY + e.clientY) / this.state.size);
             this.props.click(x, y, this.state.ghostR);
