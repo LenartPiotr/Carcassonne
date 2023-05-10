@@ -90,6 +90,11 @@ namespace Server.Services.CarcassoneGame
             return "#ffffff";
         }
 
+        public void EndGame()
+        {
+            Engine = null;
+        }
+
         public static bool Parse(object[] p, params Type[] what)
         {
             if (p.Length != what.Length) return false;
@@ -123,7 +128,7 @@ namespace Server.Services.CarcassoneGame
                 Engine = new GameEngine(Name, Game.HubContext, new List<IGameComponent>()
                 {
                     new BaseComponent()
-                }, Players.Select(p => new GameEngines.UserData(p.User, p.Color)).ToList());
+                }, Players.Select(p => new GameEngines.UserData(p.User, p.Color)).ToList(), this);
                 
                 Group.SendAsync("Navigate", "/game");
             }

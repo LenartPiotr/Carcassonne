@@ -4,7 +4,7 @@ import { useNavigate } from "react-router-dom";
 import { Board } from './subparts/Board';
 import { Game_panel } from './subparts/Game-panel';
 import { GamePersonData } from './subparts/GamePersonData';
-import { Pawn } from './subparts/Pawn';
+import { EndGamePanel } from './subparts/EndGamePanel';
 
 import ConnectionManager from '../../managers/ConnectionManager';
 
@@ -28,6 +28,7 @@ export class Game extends Component {
             myName: '-',
             board: [],
             currentImg: '',
+            end: null, // null or end data
         };
         this.rawBitmapData = '';
         this.conn = new ConnectionManager();
@@ -36,6 +37,8 @@ export class Game extends Component {
             "PlacePiece": this.placePiece.bind(this),
             "GetNick": this.getNick.bind(this),
             "PlacePuzzle": this.placePuzzle.bind(this),
+            "GetAllBoardData": this.getAllBoardData.bind(this),
+            "EndGame": this.endGame.bind(this),
         };
     }
 
@@ -46,6 +49,7 @@ export class Game extends Component {
         this.conn.ready(() => {
             this.conn.invoke("GameAction", "GetPlayersData", []);
             this.conn.invoke("GameAction", "GetGameStage", []);
+            this.conn.invoke("GameAction", "GetAllBoardData", []);
             this.conn.invoke("GetNick");
         });
     }
@@ -78,11 +82,26 @@ export class Game extends Component {
     }
 
     placePuzzle(data) {
-        console.log("place", data.bitmapData, data.x, data.y);
         if (!data.success) return;
         var board = this.state.board;
         board.push({ bitmap: data.bitmapData, x: data.x, y: data.y, r: 0 });
         this.setState({ board: board });
+    }
+
+    getAllBoardData(data) {
+        this.setState({
+            board: data.puzzles.map(p => {
+                return {
+                    bitmap: p.bitmapData,
+                    x: p.x,
+                    y: p.y
+                };
+            })
+        });
+    }
+
+    endGame(data) {
+        this.setState({ end: data.users });
     }
 
     render() {
@@ -98,6 +117,9 @@ export class Game extends Component {
                     currentImg={this.state.currentImg}
                     click={this.clickOnPiece.bind(this)}
                     ghost={this.state.action == 'placePiece' && this.state.turn == this.state.myName} />
+                {this.state.end == null ? '' : (
+                    <EndGamePanel users={this.state.end} navigate={this.props.navigate} />
+                )}
             </div>
         );
     }

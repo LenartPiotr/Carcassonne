@@ -1,0 +1,28 @@
+﻿.EndGamePanel {
+    width: 400px;
+    height: 100%;
+    background-color: #06203De4;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    color: white;
+    position: absolute;
+    left: calc(50% - 200px);
+    top: 0;
+    z-index: 3;
+}
+.EndGamePanel > :first-child{
+    font-size: 38px;
+}
+.EndGamePanel .user{
+    margin: 10px 20px;
+    display: flex;
+    flex-direction: row;
+}
+.EndGamePanel .user > :first-child{
+    flex-grow: 1;
+}
+.EndGamePanel .user > :last-child{
+    color: yellow;
+}

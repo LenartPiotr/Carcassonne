@@ -23,7 +23,7 @@ export class Lobby extends Component {
             rooms: rooms,
             showPanel: false
         };
-        this.addMessage = _ => _;
+        this.addMessage = _ => console.log('Logger not ready', _);
 
         this.conn = new ConnectionManager();
         this.conn.afterOpen(this.conn.join.bind(this.conn, props.fetch, props.navigate, () => { }));
@@ -32,15 +32,14 @@ export class Lobby extends Component {
     }
 
     componentDidMount() {
-        this.conn.on("Message", this.onMessage);
+        this.conn.on("Message", this.onMessage.bind(this));
     }
 
     componentWillUnmount() {
-        this.conn.off("Message", this.onMessage);
+        this.conn.off("Message", this.onMessage.bind(this));
     }
 
     onMessage(status, message) {
-        console.log(status, message); // LOG
         this.addMessage(message);
     }
 

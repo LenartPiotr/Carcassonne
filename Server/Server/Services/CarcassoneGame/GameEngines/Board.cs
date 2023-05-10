@@ -36,5 +36,18 @@
                 return tab[x][y];
             }
         }
+
+        public void ForEach(Action<int, int, T> callback)
+        {
+            foreach (var xEntry in tab)
+            {
+                int x = xEntry.Key;
+                foreach (var yEntry in xEntry.Value)
+                {
+                    int y = yEntry.Key;
+                    callback(x, y, yEntry.Value);
+                }
+            }
+        }
     }
 }

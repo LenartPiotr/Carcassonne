@@ -25,9 +25,11 @@ namespace Server.Services.CarcassoneGame.GameEngines
 
         Board<IPuzzle> board;
 
+        RoomManager roomManager { get; }
+
         int turnIndex;
 
-        public GameEngine(string name, IHubContext<GlobalHub> hub, List<IGameComponent> components, List<UserData> users)
+        public GameEngine(string name, IHubContext<GlobalHub> hub, List<IGameComponent> components, List<UserData> users, RoomManager roomManager)
         {
             Name = name;
             Hub = hub;
@@ -45,6 +47,7 @@ namespace Server.Services.CarcassoneGame.GameEngines
             Puzzles.Reverse();
 
             turnIndex = 0;
+            this.roomManager = roomManager;
         }
 
         private bool GetPuzzleFromData(string data, int rot, out IPuzzle puzzle)
@@ -59,6 +62,45 @@ namespace Server.Services.CarcassoneGame.GameEngines
             catch { }
             puzzle = new BasePuzzle();
             return false;
+        }
+
+        private void End()
+        {
+            var usersData = new EndGameResponse.UserData[Users.Count];
+            for (int i = 0; i < Users.Count; i++)
+            {
+                usersData[i] = new EndGameResponse.UserData()
+                {
+                    Nick = Users[i].User.Nick,
+                    Score = Users[i].Score
+                };
+            }
+            Array.Sort(usersData, (a, b) => -a.Score.CompareTo(b.Score));
+
+            roomManager.EndGame();
+
+            Group.SendAsync("EndGame", new EndGameResponse()
+            {
+                Users = usersData
+            });
+        }
+
+        private void NextPlayer()
+        {
+            turnIndex = (turnIndex + 1) % Users.Count;
+            Puzzles.RemoveAt(0);
+
+            if (Puzzles.Count == 0)
+            {
+                End();
+                return;
+            }
+
+            Group.SendAsync("PlacePiece", new GamePlacePieceResponse()
+            {
+                PlayerTurnNick = Users[turnIndex].User.Nick,
+                Bitmap = Puzzles[0].GetBitmapData()
+            });
         }
 
         [CarcassonneAction]
@@ -138,13 +180,25 @@ namespace Server.Services.CarcassoneGame.GameEngines
             });
 
             // Change turn
-            turnIndex = (turnIndex + 1) % Users.Count;
-            Puzzles.RemoveAt(0);
+            NextPlayer();
+        }
 
-            Group.SendAsync("PlacePiece", new GamePlacePieceResponse()
+        [CarcassonneAction]
+        public void GetAllBoardData(Request r)
+        {
+            List<GameBoardDataResponse.PuzzleData> puzzles = new();
+            board.ForEach((int x, int y, IPuzzle puzzle) =>
             {
-                PlayerTurnNick = Users[turnIndex].User.Nick,
-                Bitmap = Puzzles[0].GetBitmapData()
+                puzzles.Add(new GameBoardDataResponse.PuzzleData()
+                {
+                    X = x,
+                    Y = y,
+                    BitmapData = puzzle.GetBitmapData()
+                });
+            });
+            Client(r.Conn).SendAsync("GetAllBoardData", new GameBoardDataResponse()
+            {
+                Puzzles = puzzles.ToArray()
             });
         }
     }
