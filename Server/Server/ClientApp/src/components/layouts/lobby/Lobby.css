@@ -74,3 +74,76 @@
     flex-direction: row;
     width: 100%;
 }
+
+@media only screen and (max-height: 800px) {
+    .main-lobby .logo {
+        width: 60%;
+    }
+}
+
+@media only screen and (max-width: 900px){
+    .main-lobby {
+        font-size: 18px;
+    }
+    .main-lobby .logo {
+        width: 50%;
+    }
+    .main-lobby > .content {
+        width: 600px;
+    }
+    .main-lobby .form-container {
+        width: 60%;
+    }
+    .main-lobby  > .content > .MButton {
+        width: 200px !important;
+        height: 50px !important;
+        min-height: 50px !important;
+        font-size: 22px;
+    }
+    .main-lobby .MButton {
+        width: 100px !important;
+        height: 50px !important;
+        min-height: 50px !important;
+        font-size: 22px;
+    }
+    .main-lobby .MInput > div{
+        font-size: 18px;
+    }
+    .main-lobby .MInput > input{
+        font-size: 18px;
+    }
+    .main-lobby .MButton:hover > div {
+        font-size: 24px;
+    }
+    .main-lobby .Lobby_Room > img {
+        width: 50px;
+        height: 50px;
+    }
+}
+
+@media only screen and (max-width: 650px){
+    .main-lobby {
+        font-size: 18px;
+    }
+    .main-lobby .logo {
+        width: 50%;
+    }
+    .main-lobby > .content {
+        width: 100%;
+    }
+    .main-lobby .form-container {
+        width: 90%;
+    }
+    .main-lobby .MButton {
+        width: 100px !important;
+        height: 50px !important;
+        min-height: 50px !important;
+        font-size: 22px;
+    }
+    .main-lobby .MInput > div{
+        font-size: 14px;
+    }
+    .main-lobby .MInput > input{
+        font-size: 14px;
+    }
+}

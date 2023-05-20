@@ -66,8 +66,65 @@
     width: 100%;
 }
 
-@media only screen and (max-height: 700px) {
+@media only screen and (max-height: 800px) {
     .main .logo {
         width: 60%;
+    }
+}
+
+@media only screen and (max-width: 900px){
+    .main {
+        font-size: 18px;
+    }
+    .main .logo {
+        width: 50%;
+    }
+    .main > .content {
+        width: 600px;
+    }
+    .main .form-container {
+        width: 60%;
+    }
+    .main .MButton {
+        width: 100px !important;
+        height: 50px !important;
+        min-height: 50px !important;
+        font-size: 22px;
+    }
+    .main .MInput > div{
+        font-size: 18px;
+    }
+    .main .MInput > input{
+        font-size: 18px;
+    }
+    .main .MButton:hover > div {
+        font-size: 24px;
+    }
+}
+
+@media only screen and (max-width: 650px){
+    .main {
+        font-size: 18px;
+    }
+    .main .logo {
+        width: 50%;
+    }
+    .main > .content {
+        width: 100%;
+    }
+    .main .form-container {
+        width: 90%;
+    }
+    .main .MButton {
+        width: 100px !important;
+        height: 50px !important;
+        min-height: 50px !important;
+        font-size: 22px;
+    }
+    .main .MInput > div{
+        font-size: 14px;
+    }
+    .main .MInput > input{
+        font-size: 14px;
     }
 }
