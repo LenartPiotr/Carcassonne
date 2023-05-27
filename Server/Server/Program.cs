@@ -5,6 +5,7 @@ using MySqlConnector;
 using Server.DatabaseContext;
 using Server.Services.CarcassoneGame;
 using Server.Services.HubSessionBridge;
+using Server.Services.Kafka;
 using Server.SignalRHubs;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -40,6 +41,10 @@ builder.Services.AddSingleton<ICarcassonneGame, CarcassonneGame>();
 
 // Add service connect session and hub
 builder.Services.AddSingleton<IBridge, HSBridge>();
+
+// Add kafaka service
+builder.Services.AddHostedService<KafkaConsumerHostedService>();
+builder.Services.AddHostedService<KafkaProducerHostedService>();
 
 var app = builder.Build();
 
